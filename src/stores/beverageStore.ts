@@ -32,10 +32,31 @@ export const useBeverageStore = defineStore("BeverageStore", {
     currentName: "",
   }),
 
-  actions: {
-    init() {},
-    makeBeverage() {},
+actions: {
+    makeBeverage(name: string) {
+      const newBeverage = {
+        name,
+        temp: this.currentTemp,
+        base: this.currentBase,
+        creamer: this.currentCreamer,
+        syrup: this.currentSyrup,
+      };
 
-    showBeverage() {},
+      this.beverage.push(newBeverage);
+    },
+
+    showBeverage(bev: any) {
+      const store = this as any;
+
+      store.currentTemp = bev.temp;
+      store.currentBase = bev.base;
+      store.currentCreamer = bev.creamer;
+      store.currentSyrup = bev.syrup;
+      
+    }
   },
+
+  persist: true,
+
 });
+export {tempretures, bases, syrups, creamers}

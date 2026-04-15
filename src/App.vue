@@ -1,138 +1,181 @@
 <template>
-  <div>
-    <Beverage 
-      :isIced="currentTemp === 'Cold'"
-      :base="currentBase"
-      :creamer="currentCreamer"
-      :syrup="currentSyrup"
-    />
-    <ul>
-      <li>
-        <template v-for="temp in temps" :key="temp">
-          <label>
-            <input
-              type="radio"
-              name="temperature"
-              :id="`r${temp}`"
-              :value="temp"
-              v-model="currentTemp"
-            />
-            {{ temp }}
-          </label>
-        </template>
-      </li>
-    </ul>
-  </div>
-  
-  <div>
-    <ul>
-      <li>
-        <template v-for="base in bases" :key="base.id">
-          <label>
-            <input
-              type="radio"
-              name="base"
-              :id="`r${base.id}`"
-              :value="base"
-              v-model="currentBase"
-            />
-            {{ base.name }}
-          </label>
-        </template>
-      </li>
-    </ul>
-  </div>
+  <div v-if="currentBase">
+      <div>
+        <Beverage 
+          :isIced="currentTemp === 'Cold'"
+          :base="currentBase"
+          :creamer="currentCreamer"
+          :syrup="currentSyrup"
+        />
+        <ul>
+          <li>
+            <template v-for="temp in temps" :key="temp">
+              <label>
+                <input type="radio" :value="temp" v-model="currentTemp" />
+                {{ temp }}
+              </label>
+            </template>
+          </li>
+        </ul>
+      </div>
 
-  <div>
-    <ul>
-      <li>
-        <template v-for="syrup in syrups" :key="syrup.id">
-          <label>
-            <input
-              type="radio"
-              name="syrup"
-              :id="`r${syrup.id}`"
-              :value="syrup"
-              v-model="currentSyrup"
-            />
-            {{ syrup.name }}
-          </label>
-        </template>
-      </li>
-    </ul>
-  </div>
+      <div>
+        <ul>
+          <li>
+            <template v-for="base in bases" :key="base.id">
+              <label>
+                <input type="radio" :value="base" v-model="currentBase" />
+                {{ base.name }}
+              </label>
+            </template>
+          </li>
+        </ul>
+      </div>
 
-  <div>
-    <ul>
-      <li>
-        <template v-for="creamer in creamers" :key="creamer.id">
-          <label>
-            <input
-              type="radio"
-              name="creamer"
-              :id="`r${creamer.id}`"
-              :value="creamer"
-              v-model="currentCreamer"
-            />
-            {{ creamer.name }}
-          </label>
-        </template>
-      </li>
-    </ul>
-  </div>
+      <div>
+        <ul>
+          <li>
+            <template v-for="creamer in creamers" :key="creamer.id">
+              <label>
+                <input type="radio" :value="creamer" v-model="currentCreamer" />
+                {{ creamer.name }}
+              </label>
+            </template>
+          </li>
+        </ul>
+      </div>
 
-  <div class="current-beverage">
-    <h2>Current Beverage</h2>
-    <p>
-      <b>{{ currentTemp }}</b> <b>{{ currentBase.name }}</b>
-      with <b>{{ currentSyrup.name }}</b> and <b>{{ currentCreamer.name }}</b>
-    </p>
+      <div>
+        <ul>
+          <li>
+            <template v-for="syrup in syrups" :key="syrup.id">
+              <label>
+                <input type="radio" :value="syrup" v-model="currentSyrup" />
+                {{ syrup.name }}
+              </label>
+            </template>
+          </li>
+        </ul>
+      </div>
 
-    <form @submit.prevent="handleSubmit">
-      <label for="bname">Beverage Name:</label>
-      <input type="text" id="bname" v-model="beverageName" />
-      <br /><br />
-      <input type="submit" value="Make Beverage" />
-    </form>
-  </div>
-  <br>
-  <div id="beverage-container" class="current-beverage">
-    <h2>Saved Beverages</h2>
-    <ul>
-      <li v-for="(bev, index) in store.beverage" :key="index">
-        <button @click="store.showBeverage(bev)">
-          {{ bev.name || "Unnamed Beverage" }}
-        </button>
-      </li>
-    </ul>
-  </div>
+      <div class="current-beverage">
+        <h2>Current Beverage</h2>
+        <p v-if="currentBase && currentSyrup && currentCreamer">
+          <b>{{ currentTemp }}</b> <b>{{ currentBase.name }}</b>
+          with <b>{{ currentSyrup.name }}</b> and <b>{{ currentCreamer.name }}</b>
+        </p>
 
-  <div class="tiny-talk">
-    <h2>Assignment 4 - Kyle Gordon - Brew Sampler</h2>
-    <p>Go to the barista stand and lab out some drinks! Make and Save them here!</p>
-    <p>Visit the <a href="https://github.com/GVSU-CIS371/assignment4-gordokyl-swimstar/tree/main" target="_blank">GitHub repo</a> here.</p>
-  </div>
+        <form @submit.prevent="handleSubmit">
+          <label for="bname">Beverage Name:</label>
+          <input type="text" id="bname" v-model="currentName" :disabled="!user" />
+          <br /><br />
+          <input type="submit" value="Make Beverage" :disabled="!user" />
+        </form>
+        <p v-if="feedback" class="feedback">{{ feedback }}</p>
+
+        <br>
+        
+        <div class="auth-container">
+          <div v-if="user">
+            <p>Welcome, <b>{{ user.displayName || user.email }}</b></p>
+            <button @click="handleLogout">Sign Out</button>
+          </div>
+          <div v-else>
+            <button @click="withGoogle">Sign in with Google</button>
+            <p v-if="authError" class="error">{{ authError }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <br>
+
+      <div v-if="user" id="beverage-container" class="current-beverage">
+        <h2>Your Saved Beverages</h2>
+        <ul v-if="beverages.length > 0">
+          <li v-for="(bev, index) in beverages" :key="index">
+            <button @click="store.showBeverage(bev)">
+              {{ bev.name || "Unnamed Beverage" }}
+            </button>
+          </li>
+        </ul>
+        <p v-else>No beverages saved yet. Start brewing!</p>
+      </div>
+    </div>
+
+    <div class="tiny-talk">
+      <h2>Assignment 5 - Kyle Gordon - Brew In The Cloud</h2>
+      <p>Visit the <a href="https://github.com/GVSU-CIS371/assignment4-gordokyl-swimstar/tree/main" target="_blank">GitHub repo</a> here.</p>
+    </div>
+
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useBeverageStore } from "./stores/beverageStore";
-import { storeToRefs } from "pinia";
+  import { ref, onBeforeMount } from "vue";
+  import { useBeverageStore } from "./stores/beverageStore";
+  import { storeToRefs } from "pinia";
+  import Beverage from "./components/Beverage.vue";
 
-import Beverage from "./components/Beverage.vue";
-const store = useBeverageStore();
+  // Firebase Auth Imports
+  import { 
+    getAuth, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    signOut, 
+    onAuthStateChanged 
+  } from "firebase/auth";
 
-const {
-  temps, bases, syrups, creamers,
-  currentTemp, currentBase, currentCreamer, currentSyrup
-} = storeToRefs(store);
+  const store = useBeverageStore();
+  const auth = getAuth();
+  const provider = new GoogleAuthProvider();
 
-const beverageName = ref("");
+  const {
+    temps, bases, syrups, creamers,
+    currentTemp, currentBase, currentCreamer, currentSyrup,
+    currentName, beverages, user
+  } = storeToRefs(store);
 
-function handleSubmit() {
-  store.makeBeverage(beverageName.value);
-  beverageName.value = "";
-}
+  const feedback = ref("");
+  const authError = ref("");
+
+  // 1. Initialize data and Auth Observer
+  onBeforeMount(() => {
+    store.init();
+    
+    // This listener runs whenever the auth state changes
+    onAuthStateChanged(auth, (firebaseUser) => {
+      store.setUser(firebaseUser);
+    });
+  });
+
+  // 2. Google Login Logic
+  async function withGoogle() {
+    try {
+      authError.value = "";
+      await signInWithPopup(auth, provider);
+    } catch (error: any) {
+      authError.value = "Failed to sign in: " + error.message;
+    }
+  }
+
+  // 3. Logout Logic
+  async function handleLogout() {
+    try {
+      await signOut(auth);
+      feedback.value = "";
+    } catch (error: any) {
+      console.error("Logout failed", error);
+    }
+  }
+
+  // 4. Handle Submission
+  async function handleSubmit() {
+    const message = await store.makeBeverage();
+    feedback.value = message;
+    
+    if (message.includes("successfully")) {
+      setTimeout(() => { feedback.value = "" }, 3000);
+    }
+  }
 </script>
 
 <style lang="scss">
@@ -145,18 +188,44 @@ html {
   height: 100%;
   background-color: #6e4228;
   background: linear-gradient(to bottom, #6e4228 0%, #956f5a 100%);
+  color: white;
 }
 ul {
   list-style: none;
+  padding: 0;
 }
 .current-beverage {
   text-align: center;
   margin: 0 auto;
-  padding: 0.25rem;
+  padding: 1rem;
   background-color: #6e4228;
   border: 2px dotted #fff;
 }
+.feedback {
+  font-style: italic;
+  margin-top: 10px;
+  color: #ffd700;
+}
 .tiny-talk{
   text-align: center;
+}
+.auth-container {
+  text-align: center;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+}
+.error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+.feedback {
+  color: #ffd700;
+  margin-top: 10px;
+}
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

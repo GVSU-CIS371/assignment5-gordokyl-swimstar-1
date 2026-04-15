@@ -81,7 +81,7 @@
             <button @click="handleLogout">Sign Out</button>
           </div>
           <div v-else>
-            <button @click="withGoogle">Sign in with Google</button>
+            <button @click="withGoogle">Sign in with Email</button>
             <p v-if="authError" class="error">{{ authError }}</p>
           </div>
         </div>
@@ -204,7 +204,7 @@ ul {
 .feedback {
   font-style: italic;
   margin-top: 10px;
-  color: #ffd700;
+  color: #2a9b0d;
 }
 .tiny-talk{
   text-align: center;

@@ -115,7 +115,6 @@
   import { storeToRefs } from "pinia";
   import Beverage from "./components/Beverage.vue";
 
-  // Firebase Auth Imports
   import { 
     getAuth, 
     signInWithPopup, 
@@ -137,17 +136,14 @@
   const feedback = ref("");
   const authError = ref("");
 
-  // 1. Initialize data and Auth Observer
   onBeforeMount(() => {
     store.init();
     
-    // This listener runs whenever the auth state changes
     onAuthStateChanged(auth, (firebaseUser) => {
       store.setUser(firebaseUser);
     });
   });
 
-  // 2. Google Login Logic
   async function withGoogle() {
     try {
       authError.value = "";
@@ -157,7 +153,6 @@
     }
   }
 
-  // 3. Logout Logic
   async function handleLogout() {
     try {
       await signOut(auth);
@@ -167,7 +162,6 @@
     }
   }
 
-  // 4. Handle Submission
   async function handleSubmit() {
     const message = await store.makeBeverage();
     feedback.value = message;

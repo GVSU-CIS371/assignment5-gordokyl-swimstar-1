@@ -74,7 +74,7 @@
         <p v-if="feedback" class="feedback">{{ feedback }}</p>
 
         <br>
-        
+
         <div class="auth-container">
           <div v-if="user">
             <p>Welcome, <b>{{ user.displayName || user.email }}</b></p>
@@ -104,7 +104,7 @@
 
     <div class="tiny-talk">
       <h2>Assignment 5 - Kyle Gordon - Brew In The Cloud</h2>
-      <p>Visit the <a href="https://github.com/GVSU-CIS371/assignment4-gordokyl-swimstar/tree/main" target="_blank">GitHub repo</a> here.</p>
+      <p>Visit the <a href="https://github.com/GVSU-CIS371/assignment5-gordokyl-swimstar-1" target="_blank">GitHub repo</a> here.</p>
     </div>
 
 </template>
